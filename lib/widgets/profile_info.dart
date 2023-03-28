@@ -39,36 +39,45 @@ class Profile extends StatelessWidget {
                 ),
               ),
 
-              Row(
-                children: [
-                  Text(
-                    '${chainProvider.address.substring(0, 6)}...${chainProvider.address.substring(chainProvider.address.length - 4, chainProvider.address.length)}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
+              GestureDetector(
+                onTap: () {
+                  Clipboard.setData(
+                    ClipboardData(
+                      text: chainProvider.address,
                     ),
-                  ),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  SizedBox(
-                    width: 12,
-                    height: 12,
-                    child: IconButton(
-                      onPressed: () {
-                        Clipboard.setData(
-                          ClipboardData(
-                            text: chainProvider.address,
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.copy),
-                      color: Colors.grey,
-                      iconSize: 12,
-                      padding: const EdgeInsets.all(0),
+                  );
+                },
+                child: Row(
+                  children: [
+                    Text(
+                      '${chainProvider.address.substring(0, 6)}...${chainProvider.address.substring(chainProvider.address.length - 4, chainProvider.address.length)}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    SizedBox(
+                      width: 12,
+                      height: 12,
+                      child: IconButton(
+                        onPressed: () {
+                          Clipboard.setData(
+                            ClipboardData(
+                              text: chainProvider.address,
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.copy),
+                        color: Colors.grey,
+                        iconSize: 12,
+                        padding: const EdgeInsets.all(0),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               // const SizedBox(
               //   height: 10,

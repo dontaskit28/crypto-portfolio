@@ -1,6 +1,8 @@
+import 'package:crypto_portfolio/providers/chain_provider.dart';
 import 'package:crypto_portfolio/utils/get_data.dart';
 import 'package:crypto_portfolio/widgets/nft_image.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class NFTCollectionImages extends StatefulWidget {
   dynamic data;
@@ -14,14 +16,17 @@ class NFTCollectionImages extends StatefulWidget {
 class _NFTCollectionImagesState extends State<NFTCollectionImages> {
   @override
   Widget build(BuildContext context) {
+    ChainProvider chainProvider =
+        Provider.of<ChainProvider>(context, listen: true);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.data['name']),
       ),
       body: FutureBuilder(
         future: getNFTCollectionData(
-          widget.data["token_address"],
-          widget.chain,
+          tokenAddress: widget.data["token_address"],
+          chain: widget.chain,
+          address: chainProvider.address,
           needImage: false,
         ),
         builder: (context, dynamic snapshot) {

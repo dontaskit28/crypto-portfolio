@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:crypto_portfolio/providers/balnace_provider.dart';
+import 'package:crypto_portfolio/providers/chain_provider.dart';
 import 'package:crypto_portfolio/utils/get_data.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,7 +25,10 @@ class _AssestsCardState extends State<AssestsCard>
   @override
   void initState() {
     super.initState();
-    getPriceData = getUsdPrice(widget.chain);
+    ChainProvider chainProvider =
+        Provider.of<ChainProvider>(context, listen: false);
+    getPriceData =
+        getUsdPrice(chain: widget.chain, address: chainProvider.address);
   }
 
   @override

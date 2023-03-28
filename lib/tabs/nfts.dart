@@ -1,7 +1,9 @@
+import 'package:crypto_portfolio/providers/chain_provider.dart';
 import 'package:crypto_portfolio/utils/constants.dart';
 import 'package:crypto_portfolio/utils/get_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../nft_detail.dart';
 
 class NFTs extends StatefulWidget {
@@ -28,31 +30,12 @@ class _NFTsState extends State<NFTs> with AutomaticKeepAliveClientMixin<NFTs> {
   ];
   String currentChain = 'Ethereum';
 
-  @override
-  void initState() {
-    super.initState();
-
-    scrollController.addListener(() {
-      if (scrollController.position.pixels == 0) {
-        print(scrollController.position.pixels);
-      }
-    });
-
-    // scrollController.addListener(() {
-    //   if (scrollController.position.pixels ==
-    //       scrollController.position.maxScrollExtent) {
-    //     if (loadMore == 0) return;
-    //     fetchNFTs(nftsData['cursor'], symbols[chainProvider.chain]);
-    //   }
-    // });
-    // result = fetchNFTs('', currentChain);
-  }
-
-  fetchNFTs(String cursor, String chain) async {
-    var data = await getAllNFTCollections(cursor, symbols[chain]);
-    // setState(() {
-    //   result = data;
-    // });
+  fetchNFTs(String cursor, String chain, String address) async {
+    var data = await getAllNFTCollections(
+      cursor: cursor,
+      chain: symbols[chain],
+      address: address,
+    );
     return data;
   }
 
@@ -65,6 +48,7 @@ class _NFTsState extends State<NFTs> with AutomaticKeepAliveClientMixin<NFTs> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    ChainProvider chainProvider = Provider.of(context, listen: true);
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       controller: scrollController,
@@ -114,7 +98,11 @@ class _NFTsState extends State<NFTs> with AutomaticKeepAliveClientMixin<NFTs> {
             ),
           ),
           FutureBuilder(
-            future: getAllNFTCollections('', symbols[currentChain]),
+            future: getAllNFTCollections(
+              cursor: '',
+              chain: symbols[currentChain],
+              address: chainProvider.address,
+            ),
             builder: (context, dynamic snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
@@ -181,9 +169,11 @@ class _NFTsState extends State<NFTs> with AutomaticKeepAliveClientMixin<NFTs> {
                               width: MediaQuery.of(context).size.width * 0.38,
                               child: FutureBuilder(
                                 future: getNFTCollectionData(
-                                  snapshot.data[index]['token_address']
+                                  tokenAddress: snapshot.data[index]
+                                          ['token_address']
                                       .toString(),
-                                  snapshot.data[index]['chain'],
+                                  chain: snapshot.data[index]['chain'],
+                                  address: chainProvider.address,
                                   needImage: true,
                                 ),
                                 builder: (context, dynamic snapshot2) {
@@ -195,7 +185,11 @@ class _NFTsState extends State<NFTs> with AutomaticKeepAliveClientMixin<NFTs> {
                                   } else if (snapshot2.hasError) {
                                     return Center(
                                       child: Text(
-                                          '${snapshot.data[index]['name']}'),
+                                        '${snapshot.data[index]['name']}',
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                        ),
+                                      ),
                                     );
                                   }
                                   return Image.network(

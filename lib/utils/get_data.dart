@@ -6,15 +6,15 @@ import 'package:crypto_portfolio/providers/balnace_provider.dart';
 import 'package:crypto_portfolio/providers/chain_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-// ignore: depend_on_referenced_packages
-// import 'package:collection/collection.dart';
 import 'constants.dart';
 
-const String address = "0xbdfa4f4492dd7b7cf211209c4791af8d52bf5c50";
 const String baseUrl = "https://portfolio.devdeg.com";
-const String defaultChain = "eth";
 
-Future<HistoryModel> getHistory(String cursor, String chain) async {
+Future<HistoryModel> getHistory({
+  required String cursor,
+  required String chain,
+  required String address,
+}) async {
   var headers = {'Content-Type': 'application/json'};
   var request = http.Request(
     'POST',
@@ -39,7 +39,7 @@ Future<HistoryModel> getHistory(String cursor, String chain) async {
   }
 }
 
-getTokenBalance(String chain) async {
+getTokenBalance({required String chain, required String address}) async {
   var headers = {'Content-Type': 'application/json'};
   var request = http.Request('POST', Uri.parse('$baseUrl/native/balance'));
   request.body = json.encode({
@@ -53,29 +53,30 @@ getTokenBalance(String chain) async {
   if (response.statusCode == 200) {
     return json.decode(await response.stream.bytesToString());
   } else {
-    return getTokenBalance(chain);
+    return getTokenBalance(chain: chain, address: address);
   }
 }
 
-getUsdPrice(String chain) async {
+getUsdPrice({required String chain, required String address}) async {
   var uri =
       "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${usdcBalances[chain]}&order=market_cap_desc&per_page=100&page=1&sparkline=false";
   try {
     var response = await http.get(Uri.parse(uri));
-    var token = await getTokenBalance(symbols[chain]);
+    print("hello");
     if (response.statusCode != 200) {
-      return getUsdPrice(chain);
+      return getUsdPrice(chain: chain, address: address);
     }
     var result = json.decode(response.body);
-    result[0]['balance'] = (double.parse(token['balance'])) / pow(10, 18);
-
     return result;
   } catch (e) {
     return null;
   }
 }
 
-updateUsdPrice(BalanceProvider balanceProvider) async {
+updateUsdPrice({
+  required BalanceProvider balanceProvider,
+  required String address,
+}) async {
   var uri =
       "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=ethereum%2Cmatic-network%2Cbinancecoin%2Cavalanche-2%2Cfantom%2Clotto-arbitrum&order=market_cap_desc&per_page=100&page=1&sparkline=false";
   try {
@@ -85,17 +86,22 @@ updateUsdPrice(BalanceProvider balanceProvider) async {
     }
     var result = json.decode(response.body);
     for (int i = 0; i < result.length; i++) {
+      String chain = usdcBalances.keys.firstWhere(
+        (element) => usdcBalances[element] == result[i]['id'],
+      );
       balanceProvider.setUsdBalance(
         result[i]['current_price'],
-        usdcBalances.keys.firstWhere(
-          (element) => usdcBalances[element] == result[i]['id'],
-        ),
+        chain,
       );
       balanceProvider.setChange24(
         result[i]['price_change_percentage_24h'],
-        usdcBalances.keys.firstWhere(
-          (element) => usdcBalances[element] == result[i]['id'],
-        ),
+        chain,
+      );
+      var token =
+          await getTokenBalance(chain: symbols[chain], address: address);
+      balanceProvider.setBalance(
+        (double.parse(token['balance'])) / pow(10, 18),
+        chain,
       );
     }
   } catch (e) {
@@ -103,41 +109,48 @@ updateUsdPrice(BalanceProvider balanceProvider) async {
   }
 }
 
-getTotalUSD(
-    {ChainProvider? chainProvider, BalanceProvider? balanceProvider}) async {
-  List chains = [
-    'Ethereum',
-    'Polygon',
-    'Binance',
-    'Avalanche',
-    'Fantom',
-    'Arbitrum',
-  ];
-  double totalUsd = 0;
-  for (var chain in chains) {
-    var price = await getUsdPrice(chain);
-    if (price == null) {
-      continue;
-    }
-    if (balanceProvider != null) {
-      balanceProvider.setBalance(price[0]['balance'], chain);
-      balanceProvider.setUsdBalance(price[0]['current_price'], chain);
-    }
+// getTotalUSD({
+//   ChainProvider? chainProvider,
+//   BalanceProvider? balanceProvider,
+//   required String address,
+// }) async {
+//   List chains = [
+//     'Ethereum',
+//     'Polygon',
+//     'Binance',
+//     'Avalanche',
+//     'Fantom',
+//     'Arbitrum',
+//   ];
+//   double totalUsd = 0;
+//   for (var chain in chains) {
+//     var price = await getUsdPrice(chain: chain, address: address);
+//     if (price == null) {
+//       continue;
+//     }
+//     if (balanceProvider != null) {
+//       balanceProvider.setBalance(price[0]['balance'], chain);
+//       balanceProvider.setUsdBalance(price[0]['current_price'], chain);
+//     }
 
-    totalUsd += price[0]['current_price'] * price[0]['balance'];
-  }
-  if (chainProvider == null) {
-    return totalUsd;
-  }
-  chainProvider.setTotalUsdc(totalUsd);
-  chainProvider.setCurrentUsdc(totalUsd);
-}
+//     totalUsd += price[0]['current_price'] * price[0]['balance'];
+//   }
+//   if (chainProvider == null) {
+//     return totalUsd;
+//   }
+//   chainProvider.setTotalUsdc(totalUsd);
+//   chainProvider.setCurrentUsdc(totalUsd);
+// }
 
-getAllNFTCollections(String cursor, String chain) async {
+getAllNFTCollections({
+  required String chain,
+  required String cursor,
+  required String address,
+}) async {
   var headers = {'Content-Type': 'application/json'};
   var request = http.Request('POST', Uri.parse('$baseUrl/nft/collection'));
   request.body = json.encode({
-    "address": "0x97a1341c5c827706bcbc30fb7064ec423262ce92",
+    "address": address,
     "chain": chain,
     "cursor": cursor,
   });
@@ -154,13 +167,17 @@ getAllNFTCollections(String cursor, String chain) async {
   }
 }
 
-getNFTCollectionData(String tokenAddress, String chain,
-    {required bool needImage}) async {
+getNFTCollectionData({
+  required String tokenAddress,
+  required String chain,
+  required String address,
+  required bool needImage,
+}) async {
   var headers = {'Content-Type': 'application/json'};
   var request =
       http.Request('POST', Uri.parse('$baseUrl/nft/collection/balance'));
   request.body = json.encode({
-    "address": "0x97a1341c5c827706bcbc30fb7064ec423262ce92",
+    "address": address,
     "token_address": tokenAddress,
     "chain": chain,
   });
@@ -195,7 +212,10 @@ Future<String> getImageUrl(String uri) async {
   }
 }
 
-Future<List<Tokens>> getAssetsByChain(String chain) async {
+Future<List<Tokens>> getAssetsByChain({
+  required String chain,
+  required String address,
+}) async {
   List<Tokens> tokens = [];
   if (chain == "All Chains") {
     throw ErrorDescription('All Chains');

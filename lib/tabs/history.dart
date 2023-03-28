@@ -1,9 +1,11 @@
 import 'package:crypto_portfolio/models/history_model.dart';
+import 'package:crypto_portfolio/providers/chain_provider.dart';
 import 'package:crypto_portfolio/utils/constants.dart';
 import 'package:crypto_portfolio/utils/get_data.dart';
 import 'package:crypto_portfolio/widgets/history_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class History extends StatefulWidget {
   const History({super.key});
@@ -32,24 +34,24 @@ class _HistoryState extends State<History>
   ScrollController scrollController = ScrollController();
   @override
   void initState() {
-    fetchHistory("");
-    // scrollController.addListener(() {
-    //   if (result.length <= 5 && loadMore == 1) {
-    //     fetchHistory(history['cursor']);
-    //   }
-    // });
+    ChainProvider chainProvider = Provider.of(context, listen: false);
+    fetchHistory("", chainProvider.address);
     scrollController.addListener(() {
       if (scrollController.position.pixels ==
           scrollController.position.maxScrollExtent) {
         if (loadMore == 0) return;
-        fetchHistory(history.cursor!);
+        fetchHistory(history.cursor!, chainProvider.address);
       }
     });
     super.initState();
   }
 
-  fetchHistory(String cursor) async {
-    HistoryModel data = await getHistory(cursor, symbols[currentChain]);
+  fetchHistory(String cursor, String address) async {
+    HistoryModel data = await getHistory(
+      cursor: cursor,
+      chain: symbols[currentChain],
+      address: address,
+    );
     setState(() {
       loadMore = data.cursor == null ? 0 : 1;
       history = data;
@@ -61,6 +63,8 @@ class _HistoryState extends State<History>
 
   @override
   Widget build(BuildContext context) {
+    ChainProvider chainProvider =
+        Provider.of<ChainProvider>(context, listen: true);
     super.build(context);
     return SingleChildScrollView(
       controller: scrollController,
@@ -81,7 +85,7 @@ class _HistoryState extends State<History>
                 ),
                 GestureDetector(
                   onTap: () {
-                    showBottom(context);
+                    showBottom(context, chainProvider);
                   },
                   child: Row(
                     children: [
@@ -140,6 +144,7 @@ class _HistoryState extends State<History>
 
   showBottom(
     BuildContext context,
+    ChainProvider chainProvider,
   ) {
     showBottomSheet(
       context: context,
@@ -164,7 +169,7 @@ class _HistoryState extends State<History>
                     setState(() {
                       currentChain = nftChains[index];
                       result = [];
-                      fetchHistory("");
+                      fetchHistory("", chainProvider.address);
                     });
                     Navigator.pop(context);
                   },

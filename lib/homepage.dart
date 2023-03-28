@@ -28,9 +28,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     BalanceProvider balanceProvider =
         Provider.of<BalanceProvider>(context, listen: false);
 
-    getTotalUSD(chainProvider: chainProvider, balanceProvider: balanceProvider);
+    updateUsdPrice(
+      balanceProvider: balanceProvider,
+      address: chainProvider.address,
+    );
     Timer.periodic(const Duration(seconds: 5), (timer) {
-      updateUsdPrice(balanceProvider);
+      updateUsdPrice(
+        balanceProvider: balanceProvider,
+        address: chainProvider.address,
+      );
     });
   }
 

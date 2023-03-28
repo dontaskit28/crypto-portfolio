@@ -83,7 +83,10 @@ class _ProtocolsWidgetState extends State<ProtocolsWidget> {
                   ),
                   // height: MediaQuery.of(context).size.height * 0.5,
                   child: FutureBuilder<List<Tokens>>(
-                    future: getAssetsByChain(chainProvider.chain),
+                    future: getAssetsByChain(
+                      chain: chainProvider.chain,
+                      address: chainProvider.address,
+                    ),
                     builder: (context, AsyncSnapshot<List<Tokens>> snapshot) {
                       if (snapshot.hasError) {
                         if (snapshot.error.toString() == "All Chains") {

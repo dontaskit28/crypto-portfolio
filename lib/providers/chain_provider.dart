@@ -6,7 +6,7 @@ class ChainProvider with ChangeNotifier {
   double _currentUsdc = 0;
   String _nftChain = 'Ethereum';
   bool _reset = false;
-  final String _address = "0xbdfa4f4492dd7b7cf211209c4791af8d52bf5c50";
+  String _address = "0xbdfa4f4492dd7b7cf211209c4791af8d52bf5c50";
 
   String get chain => _chain;
   double get totalUsdc => _totalUsdc;
@@ -17,6 +17,11 @@ class ChainProvider with ChangeNotifier {
 
   void setChain(String chain) {
     _chain = chain;
+    notifyListeners();
+  }
+
+  void setAddress(String address) {
+    _address = address;
     notifyListeners();
   }
 
