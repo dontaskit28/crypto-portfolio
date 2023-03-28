@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:crypto_portfolio/models/history_model.dart';
 import 'package:crypto_portfolio/models/tokens_model.dart';
 import 'package:crypto_portfolio/providers/balnace_provider.dart';
-import 'package:crypto_portfolio/providers/chain_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'constants.dart';
@@ -62,7 +61,6 @@ getUsdPrice({required String chain, required String address}) async {
       "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${usdcBalances[chain]}&order=market_cap_desc&per_page=100&page=1&sparkline=false";
   try {
     var response = await http.get(Uri.parse(uri));
-    print("hello");
     if (response.statusCode != 200) {
       return getUsdPrice(chain: chain, address: address);
     }
@@ -108,39 +106,6 @@ updateUsdPrice({
     return null;
   }
 }
-
-// getTotalUSD({
-//   ChainProvider? chainProvider,
-//   BalanceProvider? balanceProvider,
-//   required String address,
-// }) async {
-//   List chains = [
-//     'Ethereum',
-//     'Polygon',
-//     'Binance',
-//     'Avalanche',
-//     'Fantom',
-//     'Arbitrum',
-//   ];
-//   double totalUsd = 0;
-//   for (var chain in chains) {
-//     var price = await getUsdPrice(chain: chain, address: address);
-//     if (price == null) {
-//       continue;
-//     }
-//     if (balanceProvider != null) {
-//       balanceProvider.setBalance(price[0]['balance'], chain);
-//       balanceProvider.setUsdBalance(price[0]['current_price'], chain);
-//     }
-
-//     totalUsd += price[0]['current_price'] * price[0]['balance'];
-//   }
-//   if (chainProvider == null) {
-//     return totalUsd;
-//   }
-//   chainProvider.setTotalUsdc(totalUsd);
-//   chainProvider.setCurrentUsdc(totalUsd);
-// }
 
 getAllNFTCollections({
   required String chain,

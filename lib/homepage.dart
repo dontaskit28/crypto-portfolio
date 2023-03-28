@@ -17,6 +17,7 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
+// Home Page with 3 tabs (Portfolio, NFTs, History)
 class _HomeState extends State<Home> with TickerProviderStateMixin {
   @override
   void initState() {

@@ -13,6 +13,7 @@ class NFTCollectionImages extends StatefulWidget {
   State<NFTCollectionImages> createState() => _NFTCollectionImagesState();
 }
 
+// Page to show all the NFT images of a collection
 class _NFTCollectionImagesState extends State<NFTCollectionImages> {
   @override
   Widget build(BuildContext context) {

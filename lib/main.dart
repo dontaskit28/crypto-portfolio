@@ -14,6 +14,14 @@ void main() {
   ));
 }
 
+// Widget folder contains all the widgets used in the app
+// Providers folder contains all the providers used in the app
+// Tabs folder contains the 3 tabs used in the app (Portfolio, NFTs, History)
+// Utils folder contains all the helper functions and constants used in the app
+// Models folder contains all the models for the api data used in the app
+// NFT Detailed Page is the page that opens when you click on a NFT in the NFTs tab
+// Homepage is the main page of the app
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
