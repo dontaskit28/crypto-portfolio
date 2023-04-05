@@ -26,7 +26,33 @@ class BalanceProvider extends ChangeNotifier {
     'Arbitrum': 0.0,
   };
 
+  Map assets = {
+    'All Chains': 0.0,
+    'Ethereum': 0.0,
+    'Binance': 0.0,
+    'Polygon': 0.0,
+    'Fantom': 0.0,
+    'Avalanche': 0.0,
+    'Arbitrum': 0.0,
+  };
+
   double total = 0.0;
+
+  void setAsset(double amount, String chain) {
+    assets[chain] = amount;
+    notifyListeners();
+  }
+
+  double getAsset(String chain) {
+    if (chain == "All Chains") {
+      double totalAssets = 0;
+      for (var asset in assets.keys) {
+        totalAssets += assets[asset];
+      }
+      return totalAssets;
+    }
+    return assets[chain];
+  }
 
   void setBalance(double amount, String chain) {
     if (balances.keys.contains(chain)) {

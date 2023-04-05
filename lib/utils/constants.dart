@@ -25,3 +25,12 @@ Map usdcBalances = {
   'Fantom': 'fantom',
   'Arbitrum': 'lotto-arbitrum',
 };
+
+Map chainIds = {
+  'Ethereum': 1,
+  'Polygon': 137,
+  'Binance': 56,
+  'Avalanche': 43114,
+  'Fantom': 250,
+  'Arbitrum': 42161,
+};

@@ -182,8 +182,18 @@ Future<List<Tokens>> getAssetsByChain({
   required String address,
 }) async {
   List<Tokens> tokens = [];
+  List<String> tokenAddress = [];
+  List<Tokens> validTokens = [];
   if (chain == "All Chains") {
-    throw ErrorDescription('All Chains');
+    List<Tokens> all = [];
+    all.addAll(await getAssetsByChain(chain: "Ethereum", address: address));
+    all.addAll(await getAssetsByChain(chain: "Polygon", address: address));
+    all.addAll(await getAssetsByChain(chain: "Binance", address: address));
+    all.addAll(await getAssetsByChain(chain: "Avalanche", address: address));
+    all.addAll(await getAssetsByChain(chain: "Fantom", address: address));
+    all.addAll(await getAssetsByChain(chain: "Arbitrum", address: address));
+    return all;
+    // throw ErrorDescription('All Chains');
   }
   var headers = {'Content-Type': 'application/json'};
   var request = http.Request('POST', Uri.parse('$baseUrl/token/balance'));
@@ -199,8 +209,92 @@ Future<List<Tokens>> getAssetsByChain({
     for (int i = 0; i < data.length; i++) {
       tokens.add(Tokens.fromJson(data[i]));
     }
-    return tokens;
+
+    for (var element in tokens) {
+      tokenAddress.add(element.tokenAddress!);
+    }
+    List<double> usdPrices = await getTokenData(tokenAddress, chainIds[chain]!);
+    for (int i = 0; i < usdPrices.length; i++) {
+      if (usdPrices[i] != 0) {
+        tokens[i].usdPrice = usdPrices[i];
+        validTokens.add(tokens[i]);
+      } else {
+        tokens[i].usdPrice = 0;
+      }
+    }
+
+    return validTokens;
   } else {
     throw ErrorDescription('Failed to load assets');
   }
+}
+
+Future<List<double>> getTokenData(
+    List<String> tokenAddress, int chainId) async {
+  List<Map> queries = [];
+  for (var element in tokenAddress) {
+    queries.add({
+      "indexUid": "tokens",
+      "filter": "chainId=$chainId AND address=$element",
+      "limit": 5
+    });
+  }
+  var headers = {
+    'Content-Type': 'application/json',
+    'Authorization':
+        'Bearer 774e711f621aa96c54d312260b5c153966218136755fcd2b2fd90118fcc85bb4'
+  };
+  var request = http.Request('POST',
+      Uri.parse('http://search.devdeg.com/multi-search?matchingStrategy=all'));
+  request.body = json.encode({"queries": queries});
+  request.headers.addAll(headers);
+
+  http.StreamedResponse response = await request.send();
+
+  List<double> usdPrices = [];
+  if (response.statusCode == 200) {
+    var data = json.decode(await response.stream.bytesToString());
+    for (int i = 0; i < data['results'].length; i++) {
+      if (data['results'][i]['estimatedTotalHits'] == 0) {
+        usdPrices.add(0);
+      } else {
+        usdPrices.add(double.parse(data['results'][i]['hits'][0]["priceUSD"]));
+      }
+    }
+    return usdPrices;
+  } else {
+    debugPrint(response.reasonPhrase);
+    return [];
+  }
+}
+
+Future<double> getPriceByChain({
+  required String chain,
+  required String address,
+  required BalanceProvider balanceProvider,
+}) async {
+  if (chain == "All Chains") {
+    await getPriceByChain(
+        chain: "Ethereum", address: address, balanceProvider: balanceProvider);
+    await getPriceByChain(
+        chain: "Polygon", address: address, balanceProvider: balanceProvider);
+    await getPriceByChain(
+        chain: "Binance", address: address, balanceProvider: balanceProvider);
+    await getPriceByChain(
+        chain: "Avalanche", address: address, balanceProvider: balanceProvider);
+    await getPriceByChain(
+        chain: "Fantom", address: address, balanceProvider: balanceProvider);
+    await getPriceByChain(
+        chain: "Arbitrum", address: address, balanceProvider: balanceProvider);
+    return 0;
+  }
+  List<Tokens> tokens = await getAssetsByChain(chain: chain, address: address);
+  double total = 0;
+  for (var token in tokens) {
+    total += token.usdPrice! *
+        (BigInt.parse(token.balance!) /
+            BigInt.parse(pow(10, token.decimals!).toString()));
+  }
+  balanceProvider.setAsset(total, chain);
+  return total;
 }

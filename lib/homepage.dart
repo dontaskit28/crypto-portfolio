@@ -33,6 +33,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       balanceProvider: balanceProvider,
       address: chainProvider.address,
     );
+    getPriceByChain(
+      chain: chainProvider.chain,
+      address: chainProvider.address,
+      balanceProvider: balanceProvider,
+    );
     Timer.periodic(const Duration(seconds: 5), (timer) {
       updateUsdPrice(
         balanceProvider: balanceProvider,

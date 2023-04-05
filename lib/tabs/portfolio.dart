@@ -5,6 +5,7 @@ import 'package:crypto_portfolio/widgets/protocols.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/constants.dart';
+import '../utils/get_data.dart';
 import '../widgets/bottom.dart';
 
 class Portfolio extends StatefulWidget {
@@ -101,12 +102,19 @@ class _PortfolioState extends State<Portfolio>
                     ),
                   )
                 : Text(
-                    "\$${((balanceProvider.getBalance(chainProvider.chain)) * balanceProvider.getUsdBalance(chainProvider.chain)).toStringAsFixed(2)}",
+                    "\$${balanceProvider.getAsset(chainProvider.chain).toStringAsFixed(2)}",
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+            // Text(
+            //     "\$${((balanceProvider.getBalance(chainProvider.chain)) * balanceProvider.getUsdBalance(chainProvider.chain)).toStringAsFixed(2)}",
+            //     style: const TextStyle(
+            //       fontSize: 20,
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
             const SizedBox(
               height: 20,
             ),

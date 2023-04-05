@@ -18,6 +18,7 @@ class _TopProfileState extends State<TopProfile> {
   Widget build(BuildContext context) {
     BalanceProvider balanceProvider =
         Provider.of<BalanceProvider>(context, listen: true);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
@@ -47,7 +48,7 @@ class _TopProfileState extends State<TopProfile> {
                     ),
                   ),
                   Text(
-                    '\$${balanceProvider.getTotalUsdc().toStringAsFixed(2)}',
+                    "\$${balanceProvider.getAsset("All Chains").toStringAsFixed(2)}",
                     style: const TextStyle(
                       fontSize: 27,
                       fontWeight: FontWeight.bold,

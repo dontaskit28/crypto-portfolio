@@ -87,7 +87,8 @@ class _AssestsCardState extends State<AssestsCard>
                                         height: 5,
                                       ),
                                       Text(
-                                        '\$${balance.toStringAsFixed(2)}',
+                                        '\$${balanceProvider.getAsset(widget.chain).toStringAsFixed(2)}',
+                                        // '\$${balance.toStringAsFixed(2)}',
                                         style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,

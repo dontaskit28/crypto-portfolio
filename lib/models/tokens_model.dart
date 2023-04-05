@@ -6,15 +6,18 @@ class Tokens {
   String? thumbnail;
   int? decimals;
   String? balance;
+  double? usdPrice;
 
-  Tokens(
-      {this.tokenAddress,
-      this.name,
-      this.symbol,
-      this.logo,
-      this.thumbnail,
-      this.decimals,
-      this.balance});
+  Tokens({
+    this.tokenAddress,
+    this.name,
+    this.symbol,
+    this.logo,
+    this.thumbnail,
+    this.decimals,
+    this.balance,
+    this.usdPrice,
+  });
 
   Tokens.fromJson(Map<String, dynamic> json) {
     tokenAddress = json['token_address'];
@@ -24,6 +27,7 @@ class Tokens {
     thumbnail = json['thumbnail'];
     decimals = json['decimals'];
     balance = json['balance'];
+    usdPrice = 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -35,6 +39,7 @@ class Tokens {
     data['thumbnail'] = thumbnail;
     data['decimals'] = decimals;
     data['balance'] = balance;
+    data['usdPrice'] = usdPrice;
     return data;
   }
 }

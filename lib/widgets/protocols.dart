@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:crypto_portfolio/providers/balnace_provider.dart';
 import 'package:crypto_portfolio/providers/chain_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +20,9 @@ class _ProtocolsWidgetState extends State<ProtocolsWidget> {
   Widget build(BuildContext context) {
     ChainProvider chainProvider =
         Provider.of<ChainProvider>(context, listen: true);
+
+    BalanceProvider balanceProvider =
+        Provider.of<BalanceProvider>(context, listen: true);
 
     return Padding(
       padding: const EdgeInsets.only(right: 10),
@@ -60,7 +64,10 @@ class _ProtocolsWidgetState extends State<ProtocolsWidget> {
                   child: Row(
                     children: [
                       Text(
-                        '\$${chainProvider.totalUsdc.toStringAsFixed(3)}',
+                        "\$${balanceProvider.getAsset(chainProvider.chain).toStringAsFixed(2)}",
+                        style: const TextStyle(
+                          fontSize: 16,
+                        ),
                       ),
                       const SizedBox(
                         width: 10,
@@ -120,24 +127,51 @@ class _ProtocolsWidgetState extends State<ProtocolsWidget> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.6,
-                                        child: Text(
-                                          '${(BigInt.parse(snapshot.data![index].balance ?? '0') / BigInt.from(pow(10, snapshot.data![index].decimals ?? 0))).toStringAsPrecision(2)} ${snapshot.data![index].symbol ?? ''}',
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
+                                      Row(
+                                        children: [
+                                          CircleAvatar(
+                                            backgroundColor: Colors.white,
+                                            child: Image(
+                                              image: NetworkImage(
+                                                  '${snapshot.data![index].logo}'),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: 10,
+                                          ),
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                '${(BigInt.parse(snapshot.data![index].balance ?? '0') / BigInt.from(pow(10, snapshot.data![index].decimals ?? 0))).toStringAsPrecision(2)} ${snapshot.data![index].symbol ?? ''}',
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              SizedBox(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.4,
+                                                child: Text(
+                                                  snapshot.data![index].name ??
+                                                      '',
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.white70,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
+                                      Text(
+                                          "\$${((snapshot.data![index].usdPrice)! * ((BigInt.parse(snapshot.data![index].balance ?? '0')) / (BigInt.from(pow(10, snapshot.data![index].decimals ?? 0))))).toStringAsPrecision(3)}"),
                                     ],
-                                  ),
-                                  Text(
-                                    // chains[index + 1],
-                                    snapshot.data![index].name ?? '',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.white70,
-                                    ),
                                   ),
                                   index != snapshot.data!.length - 1
                                       ? const Divider(
@@ -151,14 +185,6 @@ class _ProtocolsWidgetState extends State<ProtocolsWidget> {
                           },
                         );
                       } else {
-                        if (chainProvider.chain == "All Chains") {
-                          return SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.4,
-                            child: const Center(
-                              child: Text("Select Chain"),
-                            ),
-                          );
-                        }
                         return const Padding(
                           padding: EdgeInsets.symmetric(
                             horizontal: 10,
