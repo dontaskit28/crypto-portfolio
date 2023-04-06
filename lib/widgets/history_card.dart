@@ -121,7 +121,7 @@ class HistoryCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                          "${(BigInt.parse(data.value ?? '0') / BigInt.parse(pow(10, 18).toString())).toStringAsPrecision(3)} ${data.chain.toString().toUpperCase()}"),
+                          "${(BigInt.parse(data.value ?? '0') / BigInt.parse(pow(10, 18).toString())).toStringAsFixed(3)} ${data.chain.toString().toUpperCase()}"),
                       Text(
                         "\$${((BigInt.parse(data.value ?? '0') / BigInt.parse(pow(10, 18).toString())) * balanceProvider.getUsdBalance(symbols.keys.firstWhere((element) => symbols[element] == data.chain!))).toStringAsFixed(2)}",
                         style: const TextStyle(

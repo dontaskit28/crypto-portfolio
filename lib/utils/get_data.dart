@@ -38,23 +38,23 @@ Future<HistoryModel> getHistory({
   }
 }
 
-getTokenBalance({required String chain, required String address}) async {
-  var headers = {'Content-Type': 'application/json'};
-  var request = http.Request('POST', Uri.parse('$baseUrl/native/balance'));
-  request.body = json.encode({
-    "address": address,
-    "chain": chain,
-  });
-  request.headers.addAll(headers);
+// getTokenBalance({required String chain, required String address}) async {
+//   var headers = {'Content-Type': 'application/json'};
+//   var request = http.Request('POST', Uri.parse('$baseUrl/native/balance'));
+//   request.body = json.encode({
+//     "address": address,
+//     "chain": chain,
+//   });
+//   request.headers.addAll(headers);
 
-  http.StreamedResponse response = await request.send();
+//   http.StreamedResponse response = await request.send();
 
-  if (response.statusCode == 200) {
-    return json.decode(await response.stream.bytesToString());
-  } else {
-    return getTokenBalance(chain: chain, address: address);
-  }
-}
+//   if (response.statusCode == 200) {
+//     return json.decode(await response.stream.bytesToString());
+//   } else {
+//     return getTokenBalance(chain: chain, address: address);
+//   }
+// }
 
 getUsdPrice({required String chain, required String address}) async {
   var uri =
@@ -62,7 +62,7 @@ getUsdPrice({required String chain, required String address}) async {
   try {
     var response = await http.get(Uri.parse(uri));
     if (response.statusCode != 200) {
-      return getUsdPrice(chain: chain, address: address);
+      throw "${response.statusCode}";
     }
     var result = json.decode(response.body);
     return result;
@@ -95,12 +95,12 @@ updateUsdPrice({
         result[i]['price_change_percentage_24h'],
         chain,
       );
-      var token =
-          await getTokenBalance(chain: symbols[chain], address: address);
-      balanceProvider.setBalance(
-        (double.parse(token['balance'])) / pow(10, 18),
-        chain,
-      );
+      // var token =
+      //     await getTokenBalance(chain: symbols[chain], address: address);
+      // balanceProvider.setBalance(
+      //   (double.parse(token['balance'])) / pow(10, 18),
+      //   chain,
+      // );
     }
   } catch (e) {
     return null;
@@ -193,7 +193,6 @@ Future<List<Tokens>> getAssetsByChain({
     all.addAll(await getAssetsByChain(chain: "Fantom", address: address));
     all.addAll(await getAssetsByChain(chain: "Arbitrum", address: address));
     return all;
-    // throw ErrorDescription('All Chains');
   }
   var headers = {'Content-Type': 'application/json'};
   var request = http.Request('POST', Uri.parse('$baseUrl/token/balance'));
@@ -215,14 +214,17 @@ Future<List<Tokens>> getAssetsByChain({
     }
     List<double> usdPrices = await getTokenData(tokenAddress, chainIds[chain]!);
     for (int i = 0; i < usdPrices.length; i++) {
-      if (usdPrices[i] != 0) {
-        tokens[i].usdPrice = usdPrices[i];
-        validTokens.add(tokens[i]);
-      } else {
-        tokens[i].usdPrice = 0;
+      if ((BigInt.parse(tokens[i].balance ?? '0') /
+              BigInt.from(pow(10, tokens[i].decimals ?? 0))) <=
+          0.001) {
+        continue;
       }
+      if (usdPrices[i] < 0.001) {
+        continue;
+      }
+      tokens[i].usdPrice = usdPrices[i];
+      validTokens.add(tokens[i]);
     }
-
     return validTokens;
   } else {
     throw ErrorDescription('Failed to load assets');

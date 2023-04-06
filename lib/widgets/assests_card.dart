@@ -36,9 +36,6 @@ class _AssestsCardState extends State<AssestsCard>
     BalanceProvider balanceProvider =
         Provider.of<BalanceProvider>(context, listen: true);
 
-    var balance = balanceProvider.getBalance(widget.chain) *
-        balanceProvider.getUsdBalance(widget.chain);
-
     super.build(context);
     return FutureBuilder(
       future: getPriceData,

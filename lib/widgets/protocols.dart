@@ -120,58 +120,48 @@ class _ProtocolsWidgetState extends State<ProtocolsWidget> {
                                 vertical: 5,
                               ),
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Row(
+                                      CircleAvatar(
+                                        backgroundColor: Colors.white,
+                                        child: Image(
+                                          image: NetworkImage(
+                                              '${snapshot.data![index].thumbnail}'),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          CircleAvatar(
-                                            backgroundColor: Colors.white,
-                                            child: Image(
-                                              image: NetworkImage(
-                                                  '${snapshot.data![index].logo}'),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                          Row(
                                             children: [
                                               Text(
-                                                '${(BigInt.parse(snapshot.data![index].balance ?? '0') / BigInt.from(pow(10, snapshot.data![index].decimals ?? 0))).toStringAsPrecision(2)} ${snapshot.data![index].symbol ?? ''}',
-                                                overflow: TextOverflow.ellipsis,
+                                                snapshot.data![index].symbol ??
+                                                    '',
                                               ),
-                                              SizedBox(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.4,
-                                                child: Text(
-                                                  snapshot.data![index].name ??
-                                                      '',
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.white70,
-                                                  ),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
+                                              Text(
+                                                " ${(BigInt.parse(snapshot.data![index].balance ?? '0') / BigInt.from(pow(10, snapshot.data![index].decimals ?? 0))).toStringAsFixed(3)}",
                                               ),
                                             ],
                                           ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                  "${(snapshot.data![index].name?.length ?? 0) >= 16 ? '${snapshot.data![index].name?.substring(0, 16)}...' : snapshot.data![index].name}"),
+                                              Text(
+                                                  " \$${((snapshot.data![index].usdPrice)! * ((BigInt.parse(snapshot.data![index].balance ?? '0')) / (BigInt.from(pow(10, snapshot.data![index].decimals ?? 0))))).toStringAsFixed(3)}"),
+                                            ],
+                                          ),
                                         ],
-                                      ),
-                                      Text(
-                                          "\$${((snapshot.data![index].usdPrice)! * ((BigInt.parse(snapshot.data![index].balance ?? '0')) / (BigInt.from(pow(10, snapshot.data![index].decimals ?? 0))))).toStringAsPrecision(3)}"),
+                                      )
                                     ],
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
                                   ),
                                   index != snapshot.data!.length - 1
                                       ? const Divider(
